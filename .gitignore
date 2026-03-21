@@ -1,0 +1,31 @@
+# Entornos virtuales
+.venv/
+venv/
+env/
+
+# PyInstaller
+build/
+dist/
+*.spec.bak
+
+# Instalador generado
+installer_output/
+
+# PDF generado
+*.pdf
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.eggs/
+
+# Editores
+.vscode/
+*.swp
+*~
+
+# Logs
+*.log
