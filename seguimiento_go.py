@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-import os
+from jira_report import main as run_reports
 
-# Punto de entrada principal
+
 def main():
-    print("SeguimientoGO")
+    run_reports()
+
 
 if __name__ == "__main__":
     main()

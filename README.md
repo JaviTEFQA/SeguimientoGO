@@ -11,6 +11,18 @@ pip install -r requirements.txt
 python seguimiento_go.py
 ```
 
+Por defecto se generan siempre los 5 reportes definidos:
+
+```bash
+python seguimiento_go.py
+```
+
+Para generar solo un subconjunto concreto:
+
+```bash
+python seguimiento_go.py --reports android ios
+```
+
 ## Compilar a ejecutable
 
 ```bash

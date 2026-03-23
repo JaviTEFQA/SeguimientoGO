@@ -29,3 +29,14 @@ __pycache__/
 
 # Logs
 *.log
+
+# ── CREDENCIALES ── NUNCA SUBIR ──
+.env
+*.env
+secrets.*
+
+# Informes HTML generados (datos internos)
+jira_report_*.html
+
+# Scripts temporales de debug
+_debug_*.py
