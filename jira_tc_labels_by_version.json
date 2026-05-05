@@ -1,0 +1,16 @@
+{
+  "26.06.100": {
+    "android": "CC_26.06.100_Android",
+    "ios": "CC_26.06.100_iOS",
+    "tvos": "CC_26.06.100_tvOS",
+    "pc": "CC_26.06.100_Web",
+    "gobff": "CC_26.06.100_BFF"
+  },
+    "26.03.100": {
+    "android": "CC_26.03.100_Android",
+    "ios": "CC_26.03.100_iOS",
+    "tvos": "CC_26.03.100_tvOS",
+    "pc": "CC_26.03.100_Web",
+    "gobff": "CC_26.03.100_BFF"
+  }
+}

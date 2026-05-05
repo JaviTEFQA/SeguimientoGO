@@ -16,6 +16,7 @@ Credenciales: se leen del fichero .env (en la misma carpeta que este script).
 """
 
 import argparse
+import json
 import os
 import sys
 import re as _re
@@ -49,61 +50,55 @@ TEST_SCOPE_FIELD = "customfield_10163"   # Test Scope (multi-select)
 # Filtros para Test Cases
 TC_LINK_OUTWARD = "is tested by"  # etiqueta outward del tipo de link "Tests"
 TC_SCOPE_FILTER = None             # None = mostrar todos los scopes; "End2End" para filtrar
+DEFAULT_VERSION = "26.06.100"
+LABELS_CONFIG_FILE = Path(__file__).parent / "jira_tc_labels_by_version.json"
 
 # ── Reportes ───────────────────────────────────────────────────────────────────
-# execution_label: label que identifica la ejecución de cada plataforma/versión
-# en los Test Case Execution (subtareas del TC en proyecto MULTISTC).
-# Patrón: CC_{fixVersion}_{Platform}
-# Ajusta si los labels de tu instancia difieren.
+# El execution_label se resuelve dinámicamente por versión desde LABELS_CONFIG_FILE.
 REPORTS = [
     {
-        "key":             "android",
-        "title":           "Android – Mobile Android · Fix Version 26.06.100",
-        "output_file":     "jira_tc_report_android.html",
-        "execution_label": "CC_26.06.100_Android",
-        "jql": (
+        "key":            "android",
+        "title_template": "Android – Mobile Android · Fix Version {version}",
+        "output_file":    "jira_tc_report_android.html",
+        "jql_template": (
             'project = "24030" AND issuetype = "User Story"'
-            ' AND fixVersion = 26.06.100 AND component = "Mobile Android"'
+            ' AND fixVersion = {version} AND component = "Mobile Android"'
         ),
     },
     {
-        "key":             "ios",
-        "title":           "iOS – Mobile iOS · Fix Version 26.06.100",
-        "output_file":     "jira_tc_report_ios.html",
-        "execution_label": "CC_26.06.100_iOS",
-        "jql": (
+        "key":            "ios",
+        "title_template": "iOS – Mobile iOS · Fix Version {version}",
+        "output_file":    "jira_tc_report_ios.html",
+        "jql_template": (
             'project = "24030" AND issuetype = "User Story"'
-            ' AND fixVersion = 26.06.100 AND component = "Mobile iOS"'
+            ' AND fixVersion = {version} AND component = "Mobile iOS"'
         ),
     },
     {
-        "key":             "tvos",
-        "title":           "tvOS · Fix Version 26.06.100",
-        "output_file":     "jira_tc_report_tvos.html",
-        "execution_label": "CC_26.06.100_tvOS",
-        "jql": (
+        "key":            "tvos",
+        "title_template": "tvOS · Fix Version {version}",
+        "output_file":    "jira_tc_report_tvos.html",
+        "jql_template": (
             'project = "24030" AND issuetype = "User Story"'
-            ' AND fixVersion = 26.06.100 AND component = tvOS'
+            ' AND fixVersion = {version} AND component = tvOS'
         ),
     },
     {
-        "key":             "pc",
-        "title":           "PC Client · Fix Version 26.06.100",
-        "output_file":     "jira_tc_report_pc.html",
-        "execution_label": "CC_26.06.100_Web",
-        "jql": (
+        "key":            "pc",
+        "title_template": "PC Client · Fix Version {version}",
+        "output_file":    "jira_tc_report_pc.html",
+        "jql_template": (
             'project = "22830" AND issuetype = "User Story"'
-            ' AND fixVersion = 26.06.100 AND component = "PC Client"'
+            ' AND fixVersion = {version} AND component = "PC Client"'
         ),
     },
     {
-        "key":             "gobff",
-        "title":           "GoBFF · Fix Version 26.06.100",
-        "output_file":     "jira_tc_report_gobff.html",
-        "execution_label": "CC_26.06.100_BFF",
-        "jql": (
+        "key":            "gobff",
+        "title_template": "GoBFF · Fix Version {version}",
+        "output_file":    "jira_tc_report_gobff.html",
+        "jql_template": (
             'project = "22830" AND issuetype = "User Story"'
-            ' AND fixVersion = 26.06.100 AND component = GoBFF'
+            ' AND fixVersion = {version} AND component = GoBFF'
         ),
     },
 ]
@@ -123,14 +118,63 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         metavar="REPORT",
         help=f"Reportes a generar. Opciones: {', '.join(REPORT_KEYS)}.",
     )
+    parser.add_argument(
+        "--version",
+        default=DEFAULT_VERSION,
+        metavar="VERSION",
+        help=f"Fix Version / ciclo a consultar (por defecto: {DEFAULT_VERSION}).",
+    )
     return parser.parse_args(argv)
 
 
-def get_selected_reports(args: argparse.Namespace) -> list[dict]:
+def get_selected_reports(args: argparse.Namespace, reports: list[dict]) -> list[dict]:
     if args.reports:
         selected = set(args.reports)
-        return [r for r in REPORTS if r["key"] in selected]
-    return list(REPORTS)
+        return [r for r in reports if r["key"] in selected]
+    return list(reports)
+
+
+def load_labels_by_version(config_path: Path) -> dict[str, dict[str, str]]:
+    """Carga el mapa de labels por versión desde un fichero JSON."""
+    if not config_path.exists():
+        raise FileNotFoundError(f"No existe el fichero de configuración: {config_path}")
+
+    with config_path.open("r", encoding="utf-8") as fh:
+        data = json.load(fh)
+
+    if not isinstance(data, dict):
+        raise ValueError("El JSON de labels debe ser un objeto {version: {...}}")
+
+    normalized: dict[str, dict[str, str]] = {}
+    for version, labels in data.items():
+        if not isinstance(labels, dict):
+            raise ValueError(f"La versión {version} debe contener un objeto de labels")
+        normalized[str(version)] = {str(k): str(v) for k, v in labels.items()}
+    return normalized
+
+
+def build_reports(version: str, labels_for_version: dict[str, str]) -> list[dict]:
+    """Construye los reportes resolviendo title/jql y execution_label por versión."""
+    resolved_reports: list[dict] = []
+    for report in REPORTS:
+        report_key = report["key"]
+        execution_label = labels_for_version.get(report_key)
+        if not execution_label:
+            raise ValueError(
+                f"Falta execution label para '{report_key}' en la versión {version}"
+            )
+
+        resolved_reports.append(
+            {
+                "key": report_key,
+                "title": report["title_template"].format(version=version),
+                "output_file": report["output_file"],
+                "execution_label": execution_label,
+                "jql": report["jql_template"].format(version=version),
+            }
+        )
+
+    return resolved_reports
 
 
 # ── Badges de estado ───────────────────────────────────────────────────────────
@@ -1010,13 +1054,33 @@ def generate_html(section_html: str, title: str, timestamp: str) -> str:
 
 # ── Main ───────────────────────────────────────────────────────────────────────
 def main(argv: list[str] | None = None) -> None:
-    args             = parse_args(argv)
-    selected_reports = get_selected_reports(args)
+    args = parse_args(argv)
 
     if not JIRA_TOKEN:
         print("[ERROR] Token de Jira no configurado.")
         print("        Define JIRA_TOKEN en el fichero .env o como variable de entorno.")
         sys.exit(1)
+
+    try:
+        labels_by_version = load_labels_by_version(LABELS_CONFIG_FILE)
+    except (OSError, json.JSONDecodeError, ValueError) as exc:
+        print(f"[ERROR] No se pudo leer la configuración de labels: {exc}")
+        sys.exit(1)
+
+    labels_for_version = labels_by_version.get(args.version)
+    if not labels_for_version:
+        available = ", ".join(sorted(labels_by_version.keys())) or "(ninguna)"
+        print(f"[ERROR] La versión '{args.version}' no está en {LABELS_CONFIG_FILE.name}.")
+        print(f"        Versiones disponibles: {available}")
+        sys.exit(1)
+
+    try:
+        reports_for_version = build_reports(args.version, labels_for_version)
+    except ValueError as exc:
+        print(f"[ERROR] Configuración inválida de labels: {exc}")
+        sys.exit(1)
+
+    selected_reports = get_selected_reports(args, reports_for_version)
 
     if not SSL_VERIFY:
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -1025,6 +1089,7 @@ def main(argv: list[str] | None = None) -> None:
     generated: list[str] = []
 
     print(f"[i] Reportes seleccionados: {', '.join(r['key'] for r in selected_reports)}")
+    print(f"[i] Versión ciclo: {args.version}")
     scope_label = TC_SCOPE_FILTER if TC_SCOPE_FILTER else "Todos"
     print(f"[i] Filtro scope: {scope_label}")
 
