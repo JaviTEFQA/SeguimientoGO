@@ -62,7 +62,7 @@ campaña de ciclo correspondiente.
 - **No sube nada a Confluence.**
 
 ```bash
-# Todos los reportes (usa la versión por defecto: 26.06.100)
+# Todos los reportes (usa la versión por defecto: 26.06.100) definida en la constante DEFAULT_VERSION de jira_tc_report.py
 python jira_tc_report.py
 
 # Todos los reportes para una versión concreta
