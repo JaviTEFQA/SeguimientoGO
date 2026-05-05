@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GoBFF · Fix Version 26.06.100 – TC Report</title>
+  <style>
+
+:root {
+    --bg:           #f0f2f5;
+    --surface:      #ffffff;
+    --primary:      #0052cc;
+    --primary-dark: #0747a6;
+    --text:         #172b4d;
+    --text-light:   #5e6c84;
+    --border:       #dfe1e6;
+    --radius:       8px;
+    --shadow:       0 2px 8px rgba(0,0,0,.10);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 28px 24px 48px;
+    min-height: 100vh;
+}
+
+/* ── Header ── */
+header {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+    color: #fff;
+    padding: 22px 28px;
+    border-radius: var(--radius);
+    margin-bottom: 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+header h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: .3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+header h1::before { content: "🧪"; font-size: 1.2rem; }
+header .meta {
+    font-size: .8rem;
+    opacity: .88;
+    text-align: right;
+    line-height: 1.8;
+}
+
+/* ── Section card ── */
+.section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 36px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+}
+.section-header {
+    background: var(--primary-dark);
+    color: #fff;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+.section-header h2 { font-size: .95rem; font-weight: 700; }
+.section-header .count {
+    background: rgba(255,255,255,.20);
+    border-radius: 20px;
+    padding: 2px 12px;
+    font-size: .75rem;
+    white-space: nowrap;
+}
+
+/* ── Table ── */
+.table-wrapper { overflow-x: auto; }
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .865rem;
+}
+thead th {
+    background: #f7f8fa;
+    color: var(--text-light);
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .7px;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+tbody tr { border-bottom: 1px solid var(--border); }
+tbody tr:last-child { border-bottom: none; }
+
+/* ── Fila de US (cabecera de grupo) ── */
+tr.us-row td {
+    background: #eef2ff;
+    border-top: 2px solid #c5d4f0;
+    border-bottom: 1px solid #c5d4f0;
+    padding: 9px 14px;
+    vertical-align: middle;
+}
+tr.us-row .us-key-link {
+    color: var(--primary-dark);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: .88rem;
+    margin-right: 4px;
+}
+tr.us-row .us-key-link:hover { text-decoration: underline; }
+tr.us-row .us-title {
+    color: var(--text);
+    font-size: .85rem;
+    font-weight: 600;
+    padding: 0 10px;
+}
+tr.us-row .us-badge { margin: 0 6px; }
+tr.us-row .us-meta {
+    font-size: .78rem;
+    color: var(--text-light);
+    white-space: nowrap;
+    padding: 0 6px;
+}
+
+/* ── Fila de TC ── */
+tr.tc-row { transition: background .12s; }
+tr.tc-row:hover { filter: brightness(.96); }
+tr.tc-row td { padding: 9px 14px; vertical-align: middle; }
+
+/* Colores de fila por resultado de ejecución */
+tr.tc-passed  { background: #f0fdf4; }
+tr.tc-failed  { background: #fff1f0; }
+tr.tc-impeded { background: #fffbeb; }
+
+tr.tc-passed td:first-child  { border-left: 4px solid #36b37e; padding-left: 18px; }
+tr.tc-failed td:first-child  { border-left: 4px solid #ff5630; padding-left: 18px; }
+tr.tc-impeded td:first-child { border-left: 4px solid #ffab00; padding-left: 18px; }
+tr.tc-row td:first-child     { border-left: 4px solid #c7d2fe; padding-left: 18px; }
+
+/* ── Columna Bugs ── */
+td.bugs-col { font-size: .78rem; white-space: nowrap; }
+td.bugs-col a {
+    display: inline-block;
+    background: #ffebe6;
+    color: #bf2600;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: .70rem;
+    font-weight: 700;
+    text-decoration: none;
+    margin: 1px 2px;
+    white-space: nowrap;
+}
+td.bugs-col a:hover { background: #ff5630; color: #fff; }
+
+/* ── Sin TCs ── */
+tr.no-tc-row td {
+    background: #fafafa;
+    color: #b3bac5;
+    font-style: italic;
+    font-size: .82rem;
+    padding: 8px 14px 8px 22px;
+    border-left: 4px solid #e5e7eb;
+}
+
+/* ── Columnas ── */
+td.id-col { white-space: nowrap; }
+td.id-col a {
+    color: var(--primary);
+    text-decoration: none;
+    font-weight: 700;
+    font-size: .84rem;
+}
+td.id-col a:hover { text-decoration: underline; color: var(--primary-dark); }
+
+td.title-col { max-width: 300px; }
+td.title-col span {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.45;
+}
+
+td.exec-id-col { white-space: nowrap; }
+td.exec-id-col a {
+    color: var(--text-light);
+    text-decoration: none;
+    font-size: .78rem;
+}
+td.exec-id-col a:hover { text-decoration: underline; color: var(--primary); }
+
+td.date-col {
+    white-space: nowrap;
+    color: var(--text-light);
+    font-size: .78rem;
+}
+
+/* ── Badges ── */
+.badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border-radius: 12px;
+    font-size: .70rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    white-space: nowrap;
+}
+.badge-green  { background: #e3fcef; color: #006644; }
+.badge-yellow { background: #fff7c0; color: #7a5800; }
+.badge-blue   { background: #deebff; color: #0052cc; }
+.badge-red    { background: #ffebe6; color: #bf2600; }
+.badge-gray   { background: #f4f5f7; color: #5e6c84; border: 1px solid #dfe1e6; }
+.badge-e2e    { background: #ede9fe; color: #5b21b6; }
+.badge-empty  {
+    color: #b3bac5;
+    font-style: italic;
+    font-size: .75rem;
+    font-weight: 400;
+    text-transform: none;
+    letter-spacing: 0;
+}
+
+/* ── Warning sin E2E ── */
+.warn-e2e {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #fff8e1;
+    color: #b45309;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: .68rem;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-left: 8px;
+}
+
+/* ── Summary box ── */
+.summary-wrap {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    margin-top: 8px;
+    margin-bottom: 36px;
+    padding: 24px 28px;
+}
+.summary-wrap h3 {
+    font-size: .95rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.summary-cards {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+.stat-card {
+    flex: 1;
+    min-width: 120px;
+    border-radius: 8px;
+    padding: 14px 18px;
+    text-align: center;
+}
+.stat-card .val {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.1;
+    display: block;
+}
+.stat-card .lbl {
+    font-size: .72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .6px;
+    margin-top: 4px;
+    display: block;
+}
+.stat-card .pct {
+    font-size: .80rem;
+    font-weight: 600;
+    margin-top: 2px;
+    display: block;
+    opacity: .80;
+}
+.stat-card.s-total   { background: #eef2ff; color: #1e3a8a; }
+.stat-card.s-passed  { background: #e3fcef; color: #006644; }
+.stat-card.s-failed  { background: #ffebe6; color: #bf2600; }
+.stat-card.s-impeded { background: #fff7c0; color: #7a5800; }
+.stat-card.s-pending { background: #f4f5f7; color: #5e6c84; border: 1px solid #dfe1e6; }
+
+/* ── Progress bar ── */
+.progress-bar-wrap { margin-top: 4px; }
+.progress-bar-wrap .pb-label {
+    font-size: .72rem;
+    color: var(--text-light);
+    margin-bottom: 6px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+.progress-bar {
+    height: 16px;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    background: #f4f5f7;
+}
+.pb-passed  { background: #36b37e; transition: width .3s; }
+.pb-failed  { background: #ff5630; transition: width .3s; }
+.pb-impeded { background: #ffab00; transition: width .3s; }
+.pb-pending { background: #dfe1e6; transition: width .3s; }
+
+/* ── Mensaje sin resultados ── */
+.empty-msg {
+    padding: 28px;
+    text-align: center;
+    color: var(--text-light);
+    font-size: .875rem;
+}
+
+/* ── Footer ── */
+footer {
+    text-align: center;
+    color: var(--text-light);
+    font-size: .75rem;
+    margin-top: 8px;
+}
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>GoBFF · Fix Version 26.06.100</h1>
+    <div class="meta">
+      <div>Generado el 05/05/2026 14:41:35</div>
+      <div>https://jira.tid.es</div>
+    </div>
+  </header>
+
+  
+    <div class="section">
+      <div class="section-header">
+        <h2>GoBFF · Fix Version 26.06.100</h2>
+        <span class="count">
+          27 User Stories
+          &nbsp;·&nbsp; 60 Test Cases
+        </span>
+      </div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>TC ID</th>
+              <th>Título del Test Case</th>
+              <th>Test Scope</th>
+              <th>Última Ejecución</th>
+              <th>Ejecución ID</th>
+              <th>Fecha</th>
+              <th>Bugs</th>
+            </tr>
+          </thead>
+          <tbody>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-35265" target="_blank">GO-35265</a><span class="us-title" title="
+
+BFF. [JEFE-858] Acceso a grids legacy: Caso ECHs: Quitar WA">
+
+BFF. [JEFE-858] Acceso a grids legacy: Caso ECHs: Quitar WA</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP3</span><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="no-tc-row"><td colspan="7">Sin test cases vinculados</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-35043" target="_blank">GO-35043</a><span class="us-title" title="BFF. Paso parámetro Texto Alternativo para Accesibilidad">BFF. Paso parámetro Texto Alternativo para Accesibilidad</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3867" target="_blank" style="background:#ffedd5;color:#9a3412;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Editorial Carousels: Highlights </a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41835" target="_blank">MULTISTC-41835</a></td><td class="title-col"><span title="[BFF] screenReadersDescription propagated in LNK response for Highlight carousels">[BFF] screenReadersDescription propagated in LNK response for Highlight carousels</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34923" target="_blank">GO-34923</a><span class="us-title" title="BFF. [JEFE-212] Continue Watching Carousel: VOD Serie">BFF. [JEFE-212] Continue Watching Carousel: VOD Serie</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3619" target="_blank" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Personal Content Carrousels</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41084" target="_blank">MULTISTC-41084</a></td><td class="title-col"><span title="[BFF renderChild] BFF renderChild parameter propagation for SER and LCH items (all cases)">[BFF renderChild] BFF renderChild parameter propagation for SER and LCH items (all cases)</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-35150" target="_blank" title="Bff. PErsonal rows. Seguir viendo. relevantEpisode with no Bob Images" style="text-decoration:line-through;opacity:.55;">GO-35150</a></td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34876" target="_blank">GO-34876</a><span class="us-title" title="
+
+BFF. [JEFE-411]  User Profiles inc. Kids Profile: Filtrado en GetProfiles">
+
+BFF. [JEFE-411]  User Profiles inc. Kids Profile: Filtrado en GetProfiles</span><span class="us-badge"><span class="badge badge-blue">Code Review</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3980" target="_blank" style="background:#e0f2fe;color:#075985;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">User Profiles inc. Kids Profile</a></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-42065" target="_blank">MULTISTC-42065</a></td><td class="title-col"><span title="[BFF GetProfiles Kids Filtering] Kids profile filtered from GetProfiles for legacy app (&lt; 26.09.100)">[BFF GetProfiles Kids Filtering] Kids profile filtered from GetProfiles for legacy app (&lt; 26.09.100)</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-42066" target="_blank">MULTISTC-42066</a></td><td class="title-col"><span title="[BFF GetProfiles Kids Filtering] Kids profile returned intact for new app (&gt;= 26.09.100)">[BFF GetProfiles Kids Filtering] Kids profile returned intact for new app (&gt;= 26.09.100)</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-42067" target="_blank">MULTISTC-42067</a></td><td class="title-col"><span title="[BFF GetProfiles Kids Filtering] Kids profile NOT filtered when PROFILE_KIDS_ENABLED=false">[BFF GetProfiles Kids Filtering] Kids profile NOT filtered when PROFILE_KIDS_ENABLED=false</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-gray">Integration</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-42068" target="_blank">MULTISTC-42068</a></td><td class="title-col"><span title="[BFF GetProfiles Kids Filtering] isProfileAddEnabled is computed before applying the kids profiles filter">[BFF GetProfiles Kids Filtering] isProfileAddEnabled is computed before applying the kids profiles filter</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-gray">Integration</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34859" target="_blank">GO-34859</a><span class="us-title" title="BFF. Personal Content Carousel: Gestion de imágenes en Recordings">BFF. Personal Content Carousel: Gestion de imágenes en Recordings</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3619" target="_blank" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Personal Content Carrousels</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-40751" target="_blank">MULTISTC-40751</a></td><td class="title-col"><span title="Personal Content Carousel: Gestion de imágenes en Recordings. BFF propagation of image.url for REC and RSR items in carousel endpoints">Personal Content Carousel: Gestion de imágenes en Recordings. BFF propagation of image.url for REC and RSR items in carousel endpoints</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-42754" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-42754" target="_blank">MULTISTC-42754</a></td><td class="date-col">2026-04-29</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-40752" target="_blank">MULTISTC-40752</a></td><td class="title-col"><span title="Personal Content Carousel: Gestion de imágenes en Recordings. BFF. Fallback when image.url is empty in REC/RSR">Personal Content Carousel: Gestion de imágenes en Recordings. BFF. Fallback when image.url is empty in REC/RSR</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-42816" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-42816" target="_blank">MULTISTC-42816</a></td><td class="date-col">2026-04-29</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-40753" target="_blank">MULTISTC-40753</a></td><td class="title-col"><span title="Personal Content Carousel: Gestion de imágenes en Recordings. BFF propagates logo.url using ChannelExtraLogoUrl (color) when provisioned in LCH">Personal Content Carousel: Gestion de imágenes en Recordings. BFF propagates logo.url using ChannelExtraLogoUrl (color) when provisioned in LCH</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-42817" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-42817" target="_blank">MULTISTC-42817</a></td><td class="date-col">2026-04-29</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-40754" target="_blank">MULTISTC-40754</a></td><td class="title-col"><span title="Personal Content Carousel: Gestion de imágenes en Recordings. Fallback. BFF returns logo.url using ChannelLogoUrl (B/W) when ChannelExtraLogoUrl does not exist">Personal Content Carousel: Gestion de imágenes en Recordings. Fallback. BFF returns logo.url using ChannelLogoUrl (B/W) when ChannelExtraLogoUrl does not exist</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-42818" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-42818" target="_blank">MULTISTC-42818</a></td><td class="date-col">2026-04-29</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34818" target="_blank">GO-34818</a><span class="us-title" title="BFF. [JEFE-946] Now on TV in TA: Inclusion liveNow">BFF. [JEFE-946] Now on TV in TA: Inclusion liveNow</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3934" target="_blank" style="background:#ecfccb;color:#3f6212;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Now on TV in Thematic Areas</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-38970" target="_blank">MULTISTC-38970</a></td><td class="title-col"><span title="Generic Carousel. LCH included in BFF response">Generic Carousel. LCH included in BFF response</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34621" target="_blank" title="bff GOWeb. Generic row with LCH. Aka. TVAccess as Generic. LSCs not cointains BoB Images" style="text-decoration:line-through;opacity:.55;">GO-34621</a></td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34741" target="_blank">GO-34741</a><span class="us-title" title="BFF. GetMenu. Fallback en navigationBarMenu">BFF. GetMenu. Fallback en navigationBarMenu</span><span class="us-badge"><span class="badge badge-green">Resolved</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3381" target="_blank" style="background:#ede9fe;color:#5b21b6;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Mobile and tablet UI redesign</a></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41199" target="_blank">MULTISTC-41199</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Home y Search en posiciones 1-4: BFF retorna navigationBarMenu sin modificar">[GetMenu.navigationBarMenu] Home y Search en posiciones 1-4: BFF retorna navigationBarMenu sin modificar</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41200" target="_blank">MULTISTC-41200</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Home ausente: BFF inserta CHA básico {deeplinkType:1} al final">[GetMenu.navigationBarMenu] Home ausente: BFF inserta CHA básico {deeplinkType:1} al final</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41201" target="_blank">MULTISTC-41201</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Search ausente: BFF inserta CHA básico {deeplinkType:6} al final">[GetMenu.navigationBarMenu] Search ausente: BFF inserta CHA básico {deeplinkType:6} al final</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41203" target="_blank">MULTISTC-41203</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Home fuera de rango pos&gt;4, Search en rango tras shift: solo Home se recoloca a pos 1">[GetMenu.navigationBarMenu] Home fuera de rango pos&gt;4, Search en rango tras shift: solo Home se recoloca a pos 1</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41204" target="_blank">MULTISTC-41204</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Home y Search ambos fuera de rango: BFF recoloca Home a pos 1 y Search a pos 2">[GetMenu.navigationBarMenu] Home y Search ambos fuera de rango: BFF recoloca Home a pos 1 y Search a pos 2</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41205" target="_blank">MULTISTC-41205</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Home en pos 1 y Search fuera de rango: BFF mueve Search a posición 2">[GetMenu.navigationBarMenu] Home en pos 1 y Search fuera de rango: BFF mueve Search a posición 2</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41206" target="_blank">MULTISTC-41206</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Home en {2,3,4} y Search fuera de rango: Search a pos 1 y conmutación de Home con vecino izquierdo">[GetMenu.navigationBarMenu] Home en {2,3,4} y Search fuera de rango: Search a pos 1 y conmutación de Home con vecino izquierdo</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41207" target="_blank">MULTISTC-41207</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Lista &gt;4 items tras fallback: BFF trunca a exactamente 4 elementos">[GetMenu.navigationBarMenu] Lista &gt;4 items tras fallback: BFF trunca a exactamente 4 elementos</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-gray">Integration</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41208" target="_blank">MULTISTC-41208</a></td><td class="title-col"><span title="[GetMenu.topMenu] Filtrado de deeplinkType:6 en topMenu para dispositivos móviles (501/502/601/602)">[GetMenu.topMenu] Filtrado de deeplinkType:6 en topMenu para dispositivos móviles (501/502/601/602)</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41209" target="_blank">MULTISTC-41209</a></td><td class="title-col"><span title="[GetMenu.topMenu] deeplinkType:6 en topMenu para dispositivos no móviles: BFF no aplica filtrado">[GetMenu.topMenu] deeplinkType:6 en topMenu para dispositivos no móviles: BFF no aplica filtrado</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-gray">Integration</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41210" target="_blank">MULTISTC-41210</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] navigationBarMenu vacío en MIB: BFF inserta Home y Search correctamente">[GetMenu.navigationBarMenu] navigationBarMenu vacío en MIB: BFF inserta Home y Search correctamente</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-gray">Integration</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41689" target="_blank">MULTISTC-41689</a></td><td class="title-col"><span title="[GetMenu.navigationBarMenu] Home y Search ausentes: BFF inserta CHAs deeplinkType:1 y deeplinkType:6 al final">[GetMenu.navigationBarMenu] Home y Search ausentes: BFF inserta CHAs deeplinkType:1 y deeplinkType:6 al final</span></td><td><span class="badge badge-gray">System</span> <span class="badge badge-e2e">End2End</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34681" target="_blank">GO-34681</a><span class="us-title" title="BFF. [JEFE-688]. Last navigation levels:: Endpoints: ThematicGridPage">BFF. [JEFE-688]. Last navigation levels:: Endpoints: ThematicGridPage</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3866" target="_blank" style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Architecture Redesign (Home &amp; Service Navigation)</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41170" target="_blank">MULTISTC-41170</a></td><td class="title-col"><span title="BFF. Last navigation levels:: Endpoints: ThematicGridPage">BFF. Last navigation levels:: Endpoints: ThematicGridPage</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41187" target="_blank">MULTISTC-41187</a></td><td class="title-col"><span title="BFF. Last navigation levels:: Endpoints: ThematicGridPage. inexistent Order">BFF. Last navigation levels:: Endpoints: ThematicGridPage. inexistent Order</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34675" target="_blank">GO-34675</a><span class="us-title" title="BFF. [JEFE-411]  User Profiles inc. Kids Profile: Evolución GetProfile/SetProfile">BFF. [JEFE-411]  User Profiles inc. Kids Profile: Evolución GetProfile/SetProfile</span><span class="us-badge"><span class="badge badge-green">Resolved</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3980" target="_blank" style="background:#e0f2fe;color:#075985;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">User Profiles inc. Kids Profile</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41699" target="_blank">MULTISTC-41699</a></td><td class="title-col"><span title="[GetProfiles] Propagar campos nuevos desde APIHub en GetProfiles">[GetProfiles] Propagar campos nuevos desde APIHub en GetProfiles</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41700" target="_blank">MULTISTC-41700</a></td><td class="title-col"><span title="[GetProfiles] Aplicar máscara de isBlocked con PROFILE_BLOCKING_ENABLED">[GetProfiles] Aplicar máscara de isBlocked con PROFILE_BLOCKING_ENABLED</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41701" target="_blank">MULTISTC-41701</a></td><td class="title-col"><span title="[GetProfiles] Aplicar máscara hasAccessCode en perfil hogar">[GetProfiles] Aplicar máscara hasAccessCode en perfil hogar</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41702" target="_blank">MULTISTC-41702</a></td><td class="title-col"><span title="[GetProfiles] Aplicar máscara hasAccessCode en perfil no hogar">[GetProfiles] Aplicar máscara hasAccessCode en perfil no hogar</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41703" target="_blank">MULTISTC-41703</a></td><td class="title-col"><span title="[GetProfiles] Aplicar NOT sobre profilesFirstUse con PROFILES_FTU_DISABLED">[GetProfiles] Aplicar NOT sobre profilesFirstUse con PROFILES_FTU_DISABLED</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41704" target="_blank">MULTISTC-41704</a></td><td class="title-col"><span title="[EditProfile] Actualizar accessCode nullable en EditProfile">[EditProfile] Actualizar accessCode nullable en EditProfile</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41705" target="_blank">MULTISTC-41705</a></td><td class="title-col"><span title="[EditProfile] Actualizar flag isKids en EditProfile">[EditProfile] Actualizar flag isKids en EditProfile</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41706" target="_blank">MULTISTC-41706</a></td><td class="title-col"><span title="[EditProfile] Actualizar flag isExitBlocked en EditProfile">[EditProfile] Actualizar flag isExitBlocked en EditProfile</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34669" target="_blank">GO-34669</a><span class="us-title" title="BFF. [JEFE-411]  User Profiles inc. Kids Profile: Filtrado de widgets">BFF. [JEFE-411]  User Profiles inc. Kids Profile: Filtrado de widgets</span><span class="us-badge"><span class="badge badge-blue">Code Review</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3980" target="_blank" style="background:#e0f2fe;color:#075985;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">User Profiles inc. Kids Profile</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-41707" target="_blank">MULTISTC-41707</a></td><td class="title-col"><span title="BFF. Filtrado de widgets Profile Lock with parental PIN (3) y Profile Lock with Access Code (60)">BFF. Filtrado de widgets Profile Lock with parental PIN (3) y Profile Lock with Access Code (60)</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34657" target="_blank">GO-34657</a><span class="us-title" title="
+
+BFF. [JEFE-224] : New Carrousel Shapes">
+
+BFF. [JEFE-224] : New Carrousel Shapes</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3893" target="_blank" style="background:#fce7f3;color:#9d174d;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Editorial Carousels: Shapes </a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-40096" target="_blank">MULTISTC-40096</a></td><td class="title-col"><span title="Editorial Shapes. Collection parameters mapping">Editorial Shapes. Collection parameters mapping</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-42192" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-42192" target="_blank">MULTISTC-42192</a></td><td class="date-col">2026-04-21</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34593" target="_blank">GO-34593</a><span class="us-title" title="
+
+BFF. Architecture Redesign (Home &amp; Service Navigation):  Gestion de sobrecarga en backend">
+
+BFF. Architecture Redesign (Home &amp; Service Navigation):  Gestion de sobrecarga en backend</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3866" target="_blank" style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Architecture Redesign (Home &amp; Service Navigation)</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39867" target="_blank">MULTISTC-39867</a></td><td class="title-col"><span title="BFF. Architecture Redesign. Home and TA. new endpoint thematic-site-page-prio">BFF. Architecture Redesign. Home and TA. new endpoint thematic-site-page-prio</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39868" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39868" target="_blank">MULTISTC-39868</a></td><td class="date-col">2026-04-09</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34587" target="_blank">GO-34587</a><span class="us-title" title="
+
+BFF. [JEFE-858] Acceso a grids legacy: Caso ECHs">
+
+BFF. [JEFE-858] Acceso a grids legacy: Caso ECHs</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="no-tc-row"><td colspan="7">Sin test cases vinculados</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34580" target="_blank">GO-34580</a><span class="us-title" title="BFF. [JEFE-1239]Logos de canales en color">BFF. [JEFE-1239]Logos de canales en color</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP3</span><a href="https://jira.tid.es/browse/GOSPECS-3831" target="_blank" style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">TV Access</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39951" target="_blank">MULTISTC-39951</a></td><td class="title-col"><span title="Color channel logos. Image logo of type EXTRA">Color channel logos. Image logo of type EXTRA</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-41642" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-41642" target="_blank">MULTISTC-41642</a></td><td class="date-col">2026-04-21</td><td class='bugs-col'><a href="https://jira.tid.es/browse/OPENPLAT-59227" target="_blank" title="[API-HUB] distributorInfo.Images.Extra no se informa en objetos CHA / NetworkCatchup" style="text-decoration:line-through;opacity:.55;">OPENPLAT-59227</a><a href="https://jira.tid.es/browse/GO-35027" target="_blank" title="BFF. On L7Ds rows, logos have ICON type instead of EXTRA type" style="text-decoration:line-through;opacity:.55;">GO-35027</a></td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34509" target="_blank">GO-34509</a><span class="us-title" title="BFF. [JEFE-287] Mobile and Tablet UI Redesign: Correcciones en Bottom Navigation Bar">BFF. [JEFE-287] Mobile and Tablet UI Redesign: Correcciones en Bottom Navigation Bar</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3381" target="_blank" style="background:#ede9fe;color:#5b21b6;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Mobile and tablet UI redesign</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-37362" target="_blank">MULTISTC-37362</a></td><td class="title-col"><span title="BFF. NavigationBarMenu (menuType:6). DeeplinkType">BFF. NavigationBarMenu (menuType:6). DeeplinkType</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-41150" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-41150" target="_blank">MULTISTC-41150</a></td><td class="date-col">2026-04-13</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39908" target="_blank">MULTISTC-39908</a></td><td class="title-col"><span title="BFF. NavigationBarMenu (menuType:6). CatalogTypes">BFF. NavigationBarMenu (menuType:6). CatalogTypes</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-41154" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-41154" target="_blank">MULTISTC-41154</a></td><td class="date-col">2026-04-13</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34486" target="_blank">GO-34486</a><span class="us-title" title="
+
+BFF. Incluir param seriesName en contenidos MOV de LSRs">
+
+BFF. Incluir param seriesName en contenidos MOV de LSRs</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP1</span><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-36912" target="_blank">MULTISTC-36912</a></td><td class="title-col"><span title="Personal Carousel. Continue Watching. Content Info. Regression of LxD (serial) title">Personal Carousel. Continue Watching. Content Info. Regression of LxD (serial) title</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34492" target="_blank" title="BFF. &quot;seriesName&quot; parameter is not being sent in LSRs" style="text-decoration:line-through;opacity:.55;">GO-34492</a><a href="https://jira.tid.es/browse/GO-34465" target="_blank" title="Web. Personal carousel. hovercard. episode in personal row not shown series name, season number and episode number" style="text-decoration:line-through;opacity:.55;">GO-34465</a><a href="https://jira.tid.es/browse/GO-34474" target="_blank" title="Web. Personal carousel. The title is not displayed properly for Lx7 that belong to LSR" style="text-decoration:line-through;opacity:.55;">GO-34474</a><a href="https://jira.tid.es/browse/GO-34493" target="_blank" title="Web. Personal carousel. hovercard. episode in personal row not deduplicates Series Name" style="text-decoration:line-through;opacity:.55;">GO-34493</a><a href="https://jira.tid.es/browse/GO-34530" target="_blank" title="Web.Personal Carousel.The covercard title of an episode is not displayed properly in a personal carousel" style="text-decoration:line-through;opacity:.55;">GO-34530</a><a href="https://jira.tid.es/browse/GOMOBILE-58276" target="_blank" title="iOS/tvOS. No seasonNumber/episodeNumber in any episode (LXD/EPI/REC) in personal carousels" style="text-decoration:line-through;opacity:.55;">GOMOBILE-58276</a><a href="https://jira.tid.es/browse/STV-33173" target="_blank" title="Personal Carousel. Watch again. Continue Watching. Content Info. LxD (serial). Incorrect metadata when the episode name is the same as the series name (ep0, s0)" style="text-decoration:line-through;opacity:.55;">STV-33173</a></td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34453" target="_blank">GO-34453</a><span class="us-title" title="BFF. Soporte a pruebas Ahora en TV en Thematic Areas -  LCH + LSC (">BFF. Soporte a pruebas Ahora en TV en Thematic Areas -  LCH + LSC (</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3934" target="_blank" style="background:#ecfccb;color:#3f6212;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Now on TV in Thematic Areas</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-38970" target="_blank">MULTISTC-38970</a></td><td class="title-col"><span title="Generic Carousel. LCH included in BFF response">Generic Carousel. LCH included in BFF response</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34621" target="_blank" title="bff GOWeb. Generic row with LCH. Aka. TVAccess as Generic. LSCs not cointains BoB Images" style="text-decoration:line-through;opacity:.55;">GO-34621</a></td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34421" target="_blank">GO-34421</a><span class="us-title" title="
+
+BFF. [JEFE-411]  User Profiles inc. Kids Profile: Nuevo método GetAvatars">
+
+BFF. [JEFE-411]  User Profiles inc. Kids Profile: Nuevo método GetAvatars</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP1</span><a href="https://jira.tid.es/browse/GOSPECS-3980" target="_blank" style="background:#e0f2fe;color:#075985;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">User Profiles inc. Kids Profile</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39543" target="_blank">MULTISTC-39543</a></td><td class="title-col"><span title="User Profiles inc. Kids Profile. New method GetAvatars. Get the avatars tree">User Profiles inc. Kids Profile. New method GetAvatars. Get the avatars tree</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39573" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39573" target="_blank">MULTISTC-39573</a></td><td class="date-col">2026-03-19</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34362" target="_blank">GO-34362</a><span class="us-title" title="BFF. Editorial Carousels: Highlights: Identificación de colecciones">BFF. Editorial Carousels: Highlights: Identificación de colecciones</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3867" target="_blank" style="background:#ffedd5;color:#9a3412;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Editorial Carousels: Highlights </a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39194" target="_blank">MULTISTC-39194</a></td><td class="title-col"><span title="Bff. Editorial Carousels: Highlights. SlideShow identification">Bff. Editorial Carousels: Highlights. SlideShow identification</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34842" target="_blank" title="BFF. Editorial Carousels: Highlights. BFF. iOS and android mobile. Slideshow.  Incorrect images when no portraitArt provisoned" style="text-decoration:line-through;opacity:.55;">GO-34842</a></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39207" target="_blank">MULTISTC-39207</a></td><td class="title-col"><span title="Bff. Editorial Carousels: Highlights. WideScreen 1 item identification">Bff. Editorial Carousels: Highlights. WideScreen 1 item identification</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34843" target="_blank" title="BFF. Editorial Carousels: Highlights. BFF. iOS and android mobile. widescreenS1.  Incorrect images when no smallbackground provisoned" style="text-decoration:line-through;opacity:.55;">GO-34843</a></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39209" target="_blank">MULTISTC-39209</a></td><td class="title-col"><span title="Bff. Editorial Carousels: Highlights. WideScreen 2 items identification">Bff. Editorial Carousels: Highlights. WideScreen 2 items identification</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39211" target="_blank">MULTISTC-39211</a></td><td class="title-col"><span title="Bff. Editorial Carousels: Highlights. WideScreen N items identification. With N &gt; 2">Bff. Editorial Carousels: Highlights. WideScreen N items identification. With N &gt; 2</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34831" target="_blank" title="BFF. Editorial Carousels: Highlights. BFF is returning collectionLayoutStyle=&quot;editorialS2&quot; instead of &quot;editorialSN&quot; for Highlight WidescreenN carousels in tablet device" style="text-decoration:line-through;opacity:.55;">GO-34831</a></td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34319" target="_blank">GO-34319</a><span class="us-title" title="
+
+BFF. Architecture Redesign (Home &amp; Service Navigation): TA de Adultos">
+
+BFF. Architecture Redesign (Home &amp; Service Navigation): TA de Adultos</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP1</span><a href="https://jira.tid.es/browse/GOSPECS-3866" target="_blank" style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Architecture Redesign (Home &amp; Service Navigation)</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-38917" target="_blank">MULTISTC-38917</a></td><td class="title-col"><span title="BFF [Architecture Redesign (Home &amp; Service Navigation)] [GetMenu response validation] Validate `requiresPin` parameter in GetMenu response">BFF [Architecture Redesign (Home &amp; Service Navigation)] [GetMenu response validation] Validate `requiresPin` parameter in GetMenu response</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-38969" target="_blank">MULTISTC-38969</a></td><td class="title-col"><span title="BFF [Architecture Redesign (Home &amp; Service Navigation)]  Adult row filtered in non adult areas">BFF [Architecture Redesign (Home &amp; Service Navigation)]  Adult row filtered in non adult areas</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34297" target="_blank">GO-34297</a><span class="us-title" title="
+
+BFF. Architecture Redesign (Home &amp; Service Navigation):  Procesos de carga Home y TAs">
+
+BFF. Architecture Redesign (Home &amp; Service Navigation):  Procesos de carga Home y TAs</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3866" target="_blank" style="background:#d1fae5;color:#065f46;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Architecture Redesign (Home &amp; Service Navigation)</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="no-tc-row"><td colspan="7">Sin test cases vinculados</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34284" target="_blank">GO-34284</a><span class="us-title" title="
+
+BFF. Personal Content Carousel: Acciones: Quitar item de Seguir viendo">
+
+BFF. Personal Content Carousel: Acciones: Quitar item de Seguir viendo</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP1</span><a href="https://jira.tid.es/browse/GOSPECS-3619" target="_blank" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Personal Content Carrousels</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-38838" target="_blank">MULTISTC-38838</a></td><td class="title-col"><span title="[Personal Content Carrousels] [Remove from Continue Watching] Remove item from Continue Watching carousel via BFF API">[Personal Content Carrousels] [Remove from Continue Watching] Remove item from Continue Watching carousel via BFF API</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-38867" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-38867" target="_blank">MULTISTC-38867</a></td><td class="date-col">2026-03-18</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34174" target="_blank">GO-34174</a><span class="us-title" title="
+
+BFF. Nuevos param isNavigable y hasChildren en CHAs">
+
+BFF. Nuevos param isNavigable y hasChildren en CHAs</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39431" target="_blank">MULTISTC-39431</a></td><td class="title-col"><span title="Load TA. Loading params in BFF responses">Load TA. Loading params in BFF responses</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34109" target="_blank">GO-34109</a><span class="us-title" title="BFF. Personal Content Carousel: Identificación de colecciones y generalidades">BFF. Personal Content Carousel: Identificación de colecciones y generalidades</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3619" target="_blank" style="background:#fef3c7;color:#92400e;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">Personal Content Carrousels</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="no-tc-row"><td colspan="7">Sin test cases vinculados</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34070" target="_blank">GO-34070</a><span class="us-title" title="
+
+BFF. TV Access: Carrousel genérico">
+
+BFF. TV Access: Carrousel genérico</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><a href="https://jira.tid.es/browse/GOSPECS-3831" target="_blank" style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">TV Access</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-38970" target="_blank">MULTISTC-38970</a></td><td class="title-col"><span title="Generic Carousel. LCH included in BFF response">Generic Carousel. LCH included in BFF response</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34621" target="_blank" title="bff GOWeb. Generic row with LCH. Aka. TVAccess as Generic. LSCs not cointains BoB Images" style="text-decoration:line-through;opacity:.55;">GO-34621</a></td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34030" target="_blank">GO-34030</a><span class="us-title" title="
+
+BFF. TV Access: Identificación de colecciones">
+
+BFF. TV Access: Identificación de colecciones</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP1</span><a href="https://jira.tid.es/browse/GOSPECS-3831" target="_blank" style="background:#dbeafe;color:#1e40af;padding:2px 8px;border-radius:10px;font-size:.70rem;font-weight:700;text-decoration:none;white-space:nowrap;margin-left:6px;">TV Access</a><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39682" target="_blank">MULTISTC-39682</a></td><td class="title-col"><span title="BFF. TV Access. LandscapeXSmall Layout identify and transformation to APP">BFF. TV Access. LandscapeXSmall Layout identify and transformation to APP</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39683" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39683" target="_blank">MULTISTC-39683</a></td><td class="date-col">2026-03-20</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="us-row"><td colspan="7"><a class="us-key-link" href="https://jira.tid.es/browse/GO-34022" target="_blank">GO-34022</a><span class="us-title" title="
+
+BFF. Architecture Redesign (Home &amp; Service Navigation): Endpoints">
+
+BFF. Architecture Redesign (Home &amp; Service Navigation): Endpoints</span><span class="us-badge"><span class="badge badge-green">Closed</span></span><span class="us-meta">· GO 26.06.100 SP2</span><span class="warn-e2e">&#x26A0; Sin E2E</span></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-24158" target="_blank">MULTISTC-24158</a></td><td class="title-col"><span title="Top 10/Generic carrousel. Covers Portrait. LSC">Top 10/Generic carrousel. Covers Portrait. LSC</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GO-34160" target="_blank" title="BFF. BOB style images are not reaching mobile devices for future LCSs" style="text-decoration:line-through;opacity:.55;">GO-34160</a><a href="https://jira.tid.es/browse/GO-34213" target="_blank" title="[EXTERNAL PROV] incorrect live channel logo in schedules Cover in top10 and generic" style="text-decoration:line-through;opacity:.55;">GO-34213</a><a href="https://jira.tid.es/browse/GOMOBILE-57699" target="_blank" title="[EXTERNAL PROV] incorrect live channel logo in schedules Cover in top10 and generic" style="text-decoration:line-through;opacity:.55;">GOMOBILE-57699</a><a href="https://jira.tid.es/browse/STV-32593" target="_blank" title="[EXTERNAL PROV] incorrect live channel logo in schedules Cover in top10 and generic" style="text-decoration:line-through;opacity:.55;">STV-32593</a><a href="https://jira.tid.es/browse/GO-34163" target="_blank" title="BFF- The TOP10 Liveschedules  rail doesn't appear where non-subscribed LSCs should appear with the purchase icon." style="text-decoration:line-through;opacity:.55;">GO-34163</a></td></tr>
+<tr class="tc-row"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-24159" target="_blank">MULTISTC-24159</a></td><td class="title-col"><span title="Top 10/Generic carrousel. Covers Portrait. LxD">Top 10/Generic carrousel. Covers Portrait. LxD</span></td><td><span class="badge badge-gray">System</span></td><td><span class="badge badge-gray">Sin ejecución</span></td><td class="exec-id-col">—</td><td class="date-col">—</td><td class='bugs-col'><a href="https://jira.tid.es/browse/GOSPECS-3983" target="_blank" title="Top10. Procesado de imagenes en Spotligh. Parámetro donde se obtiene el icono de compra/suscripción " style="">GOSPECS-3983</a><a href="https://jira.tid.es/browse/GO-34163" target="_blank" title="BFF- The TOP10 Liveschedules  rail doesn't appear where non-subscribed LSCs should appear with the purchase icon." style="text-decoration:line-through;opacity:.55;">GO-34163</a><a href="https://jira.tid.es/browse/STV-32813" target="_blank" title="Top 10/Generic carrousel. Covers Portrait. LxD. The channel logo is not displayed" style="text-decoration:line-through;opacity:.55;">STV-32813</a><a href="https://jira.tid.es/browse/GOMOBILE-57698" target="_blank" title="Android. Wrong data format for LxD for contents broadcaster  more than 7 days ago and less than 7 days ago and beyond yesterday" style="text-decoration:line-through;opacity:.55;">GOMOBILE-57698</a></td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39626" target="_blank">MULTISTC-39626</a></td><td class="title-col"><span title="Architecture Redesign. Endpoints. ThematicSite request for first page">Architecture Redesign. Endpoints. ThematicSite request for first page</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39761" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39761" target="_blank">MULTISTC-39761</a></td><td class="date-col">2026-03-20</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39645" target="_blank">MULTISTC-39645</a></td><td class="title-col"><span title="Architecture Redesign. Endpoints. ThematicSite request for page &gt; 1">Architecture Redesign. Endpoints. ThematicSite request for page &gt; 1</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39762" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39762" target="_blank">MULTISTC-39762</a></td><td class="date-col">2026-03-20</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39700" target="_blank">MULTISTC-39700</a></td><td class="title-col"><span title="Architecture Redesign. Endpoints. GetCarousel request">Architecture Redesign. Endpoints. GetCarousel request</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39763" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39763" target="_blank">MULTISTC-39763</a></td><td class="date-col">2026-03-20</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39749" target="_blank">MULTISTC-39749</a></td><td class="title-col"><span title="Architecture Redesign. Endpoints. ThematicSite request for different carousels">Architecture Redesign. Endpoints. ThematicSite request for different carousels</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39764" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39764" target="_blank">MULTISTC-39764</a></td><td class="date-col">2026-03-20</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39753" target="_blank">MULTISTC-39753</a></td><td class="title-col"><span title="Architecture Redesign. Endpoints. GetCarousel request for different carousels">Architecture Redesign. Endpoints. GetCarousel request for different carousels</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39765" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39765" target="_blank">MULTISTC-39765</a></td><td class="date-col">2026-03-20</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+<tr class="tc-row tc-passed"><td class="id-col"><a href="https://jira.tid.es/browse/MULTISTC-39910" target="_blank">MULTISTC-39910</a></td><td class="title-col"><span title="Architecture Redesign. Endpoints. LSC not subscribed">Architecture Redesign. Endpoints. LSC not subscribed</span></td><td><span class="badge badge-gray">System</span></td><td><a href="https://jira.tid.es/browse/MULTISTC-39911" target="_blank" style="text-decoration:none;"><span class="badge badge-green">Passed</span></a></td><td class="exec-id-col"><a href="https://jira.tid.es/browse/MULTISTC-39911" target="_blank">MULTISTC-39911</a></td><td class="date-col">2026-03-24</td><td class="bugs-col" style="color:#b3bac5;">—</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+<div class="summary-wrap"><h3>&#x1F4CA; Resumen de ejecuci&oacute;n &nbsp;&middot;&nbsp; 60 Test Cases</h3><div class="summary-cards"><div class="stat-card s-total"><span class="val">60</span><span class="lbl">Total TCs</span></div><div class="stat-card s-passed"><span class="val">18</span><span class="lbl">Passed</span><span class="pct">30%</span></div><div class="stat-card s-failed"><span class="val">0</span><span class="lbl">Failed</span><span class="pct">0%</span></div><div class="stat-card s-impeded"><span class="val">0</span><span class="lbl">Impeded</span><span class="pct">0%</span></div><div class="stat-card s-pending"><span class="val">42</span><span class="lbl">Pending</span><span class="pct">70%</span></div></div><div class="progress-bar-wrap"><div class="pb-label">Distribuci&oacute;n</div><div class="progress-bar"><div class="pb-passed"  style="width:30.0%"  title="Passed &middot; 30%"></div><div class="pb-failed"  style="width:0.0%"  title="Failed &middot; 0%"></div><div class="pb-impeded" style="width:0.0%" title="Impeded &middot; 0%"></div><div class="pb-pending" style="width:70.0%" title="Pending &middot; 70%"></div></div></div></div>
+
+  <footer>
+    Generado automáticamente por <strong>jira_tc_report</strong> · 05/05/2026 14:41:35
+    · Todos los Test Cases
+  </footer>
+</body>
+</html>

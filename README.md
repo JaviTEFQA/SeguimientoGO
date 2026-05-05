@@ -2,26 +2,91 @@
 
 ## Descripción
 
-(Pendiente de definir)
+Conjunto de scripts Python para generar informes HTML de seguimiento QA a partir de Jira.
+Las credenciales se leen exclusivamente del fichero `.env` (nunca hardcodeadas en el código).
 
-## Uso
+Hay dos scripts independientes:
+
+| Script | Qué genera | Sube a Confluence |
+|---|---|---|
+| `seguimiento_go.py` | Estado de subtareas QA (Test Design / Test Execution) por US | ✅ Sí |
+| `jira_tc_report.py` | Test Cases vinculados a cada US con estado de última ejecución | ❌ No |
+
+---
+
+## Configuración
+
+Crea un fichero `.env` en la raíz del proyecto:
+
+```env
+JIRA_TOKEN=tu_token_personal_de_jira
+CONFLUENCE_TOKEN=tu_token_personal_de_confluence  # solo necesario para seguimiento_go.py
+```
+
+Instala las dependencias:
 
 ```bash
 pip install -r requirements.txt
-python seguimiento_go.py
 ```
 
-Por defecto se generan siempre los 5 reportes definidos:
+---
+
+## seguimiento_go.py — Reporte QA de subtareas
+
+Genera un HTML por plataforma con el estado de las subtareas **Test Design** y **Test Execution**
+de cada User Story, y lo sube automáticamente a la página de Confluence correspondiente.
 
 ```bash
+# Todos los reportes
 python seguimiento_go.py
-```
 
-Para generar solo un subconjunto concreto:
-
-```bash
+# Solo un subconjunto
 python seguimiento_go.py --reports android ios
 ```
+
+**Reportes disponibles:** `android`, `ios`, `tvos`, `pc`, `gobff`
+
+**Salida:** `jira_report_android.html`, `jira_report_ios.html`, etc.
+
+---
+
+## jira_tc_report.py — Reporte de Test Cases por US
+
+Genera un HTML por plataforma mostrando todos los **Test Cases** vinculados a cada User Story
+(link "is tested by"), con su **Test Scope** y el **estado de la última ejecución** de la
+campaña de ciclo correspondiente.
+
+- Las US sin ningún TC con scope **End2End** se marcan con un aviso ⚠ Sin E2E.
+- Al final de cada reporte se incluye un **cuadro resumen** con totales y porcentajes
+  (Passed / Failed / Impeded / Pending) y una barra de distribución.
+- **No sube nada a Confluence.**
+
+```bash
+# Todos los reportes
+python jira_tc_report.py
+
+# Solo un subconjunto
+python jira_tc_report.py --reports android ios
+```
+
+**Reportes disponibles:** `android`, `ios`, `tvos`, `pc`, `gobff`
+
+**Salida:** `jira_tc_report_android.html`, `jira_tc_report_ios.html`, etc.
+
+### Labels de ejecución por plataforma
+
+| Plataforma | Label de campaña |
+|---|---|
+| Android | `CC_26.06.100_Android` |
+| iOS | `CC_26.06.100_iOS` |
+| tvOS | `CC_26.06.100_tvOS` |
+| PC Client | `CC_26.06.100_Web` |
+| GoBFF | `CC_26.06.100_BFF` |
+
+Para actualizar a una nueva versión, edita los campos `execution_label` en `REPORTS`
+dentro de `jira_tc_report.py`.
+
+---
 
 ## Compilar a ejecutable
 
@@ -39,11 +104,16 @@ Requiere [Inno Setup](https://jrsoftware.org/isinfo.php).
 .\installer\build_installer.ps1
 ```
 
+---
+
 ## Estructura
 
 ```
 SeguimientoGO/
-├── seguimiento_go.py
+├── seguimiento_go.py           # Reporte QA subtareas → Confluence
+├── jira_report.py              # Lógica principal de seguimiento_go.py
+├── jira_tc_report.py           # Reporte Test Cases por US (sin Confluence)
+├── .env                        # Credenciales (NO subir a git)
 ├── requirements.txt
 ├── SeguimientoGO.spec
 ├── SeguimientoGO_OneFile.spec
