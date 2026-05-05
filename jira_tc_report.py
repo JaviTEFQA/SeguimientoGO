@@ -545,10 +545,13 @@ tr.tc-row { transition: background .12s; }
 tr.tc-row:hover { filter: brightness(.96); }
 tr.tc-row td { padding: 9px 14px; vertical-align: middle; }
 
-/* Colores de fila por resultado de ejecución */
-tr.tc-passed  { background: #f0fdf4; }
-tr.tc-failed  { background: #fff1f0; }
-tr.tc-impeded { background: #fffbeb; }
+/* Colores de fila por resultado de ejecución (línea completa) */
+tr.tc-passed,
+tr.tc-passed td  { background: #c9ecd6; }
+tr.tc-failed,
+tr.tc-failed td  { background: #f7cfcf; }
+tr.tc-impeded,
+tr.tc-impeded td { background: #f3e7b3; }
 
 tr.tc-passed td:first-child  { border-left: 4px solid #36b37e; padding-left: 18px; }
 tr.tc-failed td:first-child  { border-left: 4px solid #ff5630; padding-left: 18px; }
@@ -855,15 +858,13 @@ def render_section(
             scope_html = scope_badges_html(tc.get("scope", []))
 
             # Bugs detectados (issuelink outward "detects")
-            bugs = tc.get("bugs", [])
+            bugs = [b for b in tc.get("bugs", []) if b.get("status", "").lower() != "closed"]
             if bugs:
                 bug_parts = []
                 for b in bugs:
-                    is_closed = b.get("status", "").lower() == "closed"
-                    style = "text-decoration:line-through;opacity:.55;" if is_closed else ""
                     bug_parts.append(
                         f'<a href="{JIRA_BASE_URL}/browse/{b["key"]}" target="_blank" '
-                        f'title="{_esc(b["summary"])}" style="{style}">{b["key"]}</a>'
+                        f'title="{_esc(b["summary"])}">{b["key"]}</a>'
                     )
                 bugs_html = "<td class='bugs-col'>" + "".join(bug_parts) + "</td>"
             else:
