@@ -77,7 +77,7 @@ python jira_tc_report.py --reports android ios --version 26.06.100
 
 **Reportes disponibles:** `android`, `ios`, `tvos`, `pc`, `gobff`
 
-**Salida:** `jira_tc_report_android.html`, `jira_tc_report_ios.html`, etc.
+**Salida:** `jira_tc_report_android_26.06.100.html`, `jira_tc_report_ios_26.06.100.html`, etc.
 
 ### Labels de ejecución por plataforma
 

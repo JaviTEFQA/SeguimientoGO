@@ -59,7 +59,7 @@ REPORTS = [
     {
         "key":            "android",
         "title_template": "Android – Mobile Android · Fix Version {version}",
-        "output_file":    "jira_tc_report_android.html",
+        "output_file_template": "jira_tc_report_android_{version}.html",
         "jql_template": (
             'project = "24030" AND issuetype = "User Story"'
             ' AND fixVersion = {version} AND component = "Mobile Android"'
@@ -68,7 +68,7 @@ REPORTS = [
     {
         "key":            "ios",
         "title_template": "iOS – Mobile iOS · Fix Version {version}",
-        "output_file":    "jira_tc_report_ios.html",
+        "output_file_template": "jira_tc_report_ios_{version}.html",
         "jql_template": (
             'project = "24030" AND issuetype = "User Story"'
             ' AND fixVersion = {version} AND component = "Mobile iOS"'
@@ -77,7 +77,7 @@ REPORTS = [
     {
         "key":            "tvos",
         "title_template": "tvOS · Fix Version {version}",
-        "output_file":    "jira_tc_report_tvos.html",
+        "output_file_template": "jira_tc_report_tvos_{version}.html",
         "jql_template": (
             'project = "24030" AND issuetype = "User Story"'
             ' AND fixVersion = {version} AND component = tvOS'
@@ -86,7 +86,7 @@ REPORTS = [
     {
         "key":            "pc",
         "title_template": "PC Client · Fix Version {version}",
-        "output_file":    "jira_tc_report_pc.html",
+        "output_file_template": "jira_tc_report_pc_{version}.html",
         "jql_template": (
             'project = "22830" AND issuetype = "User Story"'
             ' AND fixVersion = {version} AND component = "PC Client"'
@@ -95,7 +95,7 @@ REPORTS = [
     {
         "key":            "gobff",
         "title_template": "GoBFF · Fix Version {version}",
-        "output_file":    "jira_tc_report_gobff.html",
+        "output_file_template": "jira_tc_report_gobff_{version}.html",
         "jql_template": (
             'project = "22830" AND issuetype = "User Story"'
             ' AND fixVersion = {version} AND component = GoBFF'
@@ -155,6 +155,7 @@ def load_labels_by_version(config_path: Path) -> dict[str, dict[str, str]]:
 
 def build_reports(version: str, labels_for_version: dict[str, str]) -> list[dict]:
     """Construye los reportes resolviendo title/jql y execution_label por versión."""
+    version_file_token = _re.sub(r"[^0-9A-Za-z._-]", "-", version)
     resolved_reports: list[dict] = []
     for report in REPORTS:
         report_key = report["key"]
@@ -168,7 +169,7 @@ def build_reports(version: str, labels_for_version: dict[str, str]) -> list[dict
             {
                 "key": report_key,
                 "title": report["title_template"].format(version=version),
-                "output_file": report["output_file"],
+                "output_file": report["output_file_template"].format(version=version_file_token),
                 "execution_label": execution_label,
                 "jql": report["jql_template"].format(version=version),
             }
