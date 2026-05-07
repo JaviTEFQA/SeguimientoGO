@@ -62,18 +62,27 @@ campaña de ciclo correspondiente.
 - **No sube nada a Confluence.**
 
 ```bash
-# Todos los reportes
+# Todos los reportes (usa la versión por defecto: 26.06.100) definida en la constante DEFAULT_VERSION de jira_tc_report.py
 python jira_tc_report.py
+
+# Todos los reportes para una versión concreta
+python jira_tc_report.py --version 26.06.100
 
 # Solo un subconjunto
 python jira_tc_report.py --reports android ios
+
+# Subconjunto + versión
+python jira_tc_report.py --reports android ios --version 26.06.100
 ```
 
 **Reportes disponibles:** `android`, `ios`, `tvos`, `pc`, `gobff`
 
-**Salida:** `jira_tc_report_android.html`, `jira_tc_report_ios.html`, etc.
+**Salida:** `jira_tc_report_android_26.06.100.html`, `jira_tc_report_ios_26.06.100.html`, etc.
 
 ### Labels de ejecución por plataforma
+
+Las labels se resuelven por versión desde el fichero `jira_tc_labels_by_version.json`.
+Para lanzar el reporte con otra campaña, usa el parámetro `--version`.
 
 | Plataforma | Label de campaña |
 |---|---|
@@ -83,8 +92,8 @@ python jira_tc_report.py --reports android ios
 | PC Client | `CC_26.06.100_Web` |
 | GoBFF | `CC_26.06.100_BFF` |
 
-Para actualizar a una nueva versión, edita los campos `execution_label` en `REPORTS`
-dentro de `jira_tc_report.py`.
+Para añadir una nueva versión, agrega una nueva clave de versión en
+`jira_tc_labels_by_version.json` con las labels por plataforma.
 
 ---
 
