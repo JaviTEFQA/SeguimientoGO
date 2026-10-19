@@ -1,12 +1,23 @@
 {
-  "26.06.100": {
-    "android": "CC_26.06.100_Android",
-    "ios": "CC_26.06.100_iOS",
-    "tvos": "CC_26.06.100_tvOS",
-    "pc": "CC_26.06.100_Web",
-    "gobff": "CC_26.06.100_BFF"
+  "26.11.100": {
+    "android": "CC_26.11.100_Android",
+    "ios": "CC_26.11.100_iOS",
+    "tvos": "CC_26.11.100_tvOS",
+    "pc": "CC_26.11.100_Web",
+    "gobff": "CC_26.11.100_BFF"
   },
-    "26.03.100": {
+  "26.10.100": {
+    "pc": "CC_26.10.100_Web",
+    "gobff": "CC_26.10.100_BFF"
+  },
+  "26.09.100": {
+    "android": "CC_26.09.100_Android",
+    "ios": "CC_26.09.100_iOS",
+    "tvos": "CC_26.09.100_tvOS",
+    "pc": "CC_26.09.100_Web",
+    "gobff": "CC_26.09.100_BFF"
+  },
+  "26.03.100": {
     "android": "CC_26.03.100_Android",
     "ios": "CC_26.03.100_iOS",
     "tvos": "CC_26.03.100_tvOS",

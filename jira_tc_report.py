@@ -50,7 +50,7 @@ TEST_SCOPE_FIELD = "customfield_10163"   # Test Scope (multi-select)
 # Filtros para Test Cases
 TC_LINK_OUTWARD = "is tested by"  # etiqueta outward del tipo de link "Tests"
 TC_SCOPE_FILTER = None             # None = mostrar todos los scopes; "End2End" para filtrar
-DEFAULT_VERSION = "26.06.100"
+DEFAULT_VERSION = "26.09.100"
 LABELS_CONFIG_FILE = Path(__file__).parent / "jira_tc_labels_by_version.json"
 
 # ── Reportes ───────────────────────────────────────────────────────────────────
@@ -153,12 +153,22 @@ def load_labels_by_version(config_path: Path) -> dict[str, dict[str, str]]:
     return normalized
 
 
-def build_reports(version: str, labels_for_version: dict[str, str]) -> list[dict]:
-    """Construye los reportes resolviendo title/jql y execution_label por versión."""
+def build_reports(
+    version: str,
+    labels_for_version: dict[str, str],
+    only_keys: set[str] | None = None,
+) -> list[dict]:
+    """Construye los reportes resolviendo title/jql y execution_label por versión.
+
+    Si se indica only_keys, solo se resuelven (y por tanto solo se exige label a)
+    esos reportes: así una versión puede tener labels de algunas plataformas.
+    """
     version_file_token = _re.sub(r"[^0-9A-Za-z._-]", "-", version)
     resolved_reports: list[dict] = []
     for report in REPORTS:
         report_key = report["key"]
+        if only_keys is not None and report_key not in only_keys:
+            continue
         execution_label = labels_for_version.get(report_key)
         if not execution_label:
             raise ValueError(
@@ -1075,8 +1085,10 @@ def main(argv: list[str] | None = None) -> None:
         print(f"        Versiones disponibles: {available}")
         sys.exit(1)
 
+    selected_keys = set(args.reports) if args.reports else None
+
     try:
-        reports_for_version = build_reports(args.version, labels_for_version)
+        reports_for_version = build_reports(args.version, labels_for_version, selected_keys)
     except ValueError as exc:
         print(f"[ERROR] Configuración inválida de labels: {exc}")
         sys.exit(1)

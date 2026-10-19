@@ -40,3 +40,10 @@ jira_report_*.html
 
 # Scripts temporales de debug
 _debug_*.py
+
+# Datos exportados de Jira para la regresión (internos, se regeneran con la skill)
+scripts/informes_mcp/regresion_pc/*.json
+
+# Estado local de Claude Code
+.claude/scheduled_tasks.lock
+.claude/settings.local.json

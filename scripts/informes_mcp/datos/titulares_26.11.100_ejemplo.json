@@ -1,0 +1,45 @@
+{
+  "global": [
+    "<b>Lissette lleva 33 ejecuciones de la 26.11</b> (13 Android, 12 iOS y 8 tvOS) y es QA de ejecución en 6 US: es quien más ejecución de móvil tiene después de Luis Alberto.",
+    "<b>Móvil: 44 US Resolved, 27 Passed.</b> El desarrollo va muy por delante de la ejecución.",
+    "<b>El diseño pendiente de móvil es el mismo en las tres plataformas:</b> Dynamic Date Format (Raquel, Open) y Airing Info + U7D (María José, In Progress)."
+  ],
+  "plataformas": {
+    "diario": [
+      "<b>Hoy en la 26.11: 0 ejecuciones. Ayer a esta hora: 0.</b> El equipo sigue volcado en cerrar la 26.10.",
+      "<b>376 ejecuciones en la campaña, 27 en Passed (7,2 %) y 0 Failed.</b> Lo poco que se ha probado, pasa.",
+      "<b>142 ejecuciones sin asignar, el 38 % de la campaña.</b> Más de un tercio de la cola no tiene dueño todavía.",
+      "<b>Luis Alberto: 185 ejecuciones asignadas, 11 nuevas hoy y todas en Pending.</b> La cola está repartida; falta que arranque.",
+      "<b>Lissette: 26 de sus 39 ejecuciones ya hechas.</b> Es quien más ha avanzado la 26.11; su última ejecución fue el 13/10."
+    ],
+    "android": [
+      "<b>15 US en Resolved. 11 Passed de 105 ejecuciones.</b> El desarrollo ha terminado y la ejecución acaba de empezar.",
+      "<b>0 Failed sobre 12 ejecutadas.</b> Lo que se ha probado, pasa.",
+      "<b>105 ejecuciones. 46 sin nadie asignado.</b> Casi la mitad de la cola no tiene dueño.",
+      "<b>57 TCs de US abiertas sin ejecución creada.</b> Todavía no existen para nadie."
+    ],
+    "ios": [
+      "<b>Editorial contents (GOMOBILE-60435): 5 de 6 Passed.</b> Le falta un solo TC para poder cerrarse.",
+      "<b>113 ejecuciones y 0 Failed.</b> Sin rojos, aunque solo se ha ejecutado una de cada ocho.",
+      "<b>14 US en Resolved. 11 sin QA de ejecución asignado.</b> El reparto de la ejecución de iOS está por hacer."
+    ],
+    "pc": [
+      "<b>55 ejecuciones y 0 Passed.</b> La 26.11 de PC no ha arrancado: el equipo sigue cerrando la 26.10.",
+      "<b>25 diseños pendientes, 17 sin nadie asignado.</b> Es la plataforma con más diseño por repartir.",
+      "<b>107 TCs de US abiertas sin ejecución creada, frente a 48 en Pending.</b> Hay más TCs sin ejecución creada que ejecuciones pendientes.",
+      "<b>María José tiene 4 diseños en curso.</b> Es quien está empujando el diseño de PC de la 26.11."
+    ],
+    "tvos": [
+      "<b>14 US en Resolved. 2 Passed de 103 ejecuciones.</b> tvOS es la plataforma con más diferencia entre lo entregado y lo probado.",
+      "<b>6 bugs en Resolved, el máximo de las cinco plataformas.</b> Hay más bugs esperando verificación que ejecuciones en Passed.",
+      "<b>User Centrics: Android e iOS cerradas, tvOS (GOMOBILE-61014) en Impeded.</b> La bloquea el bug GOMOBILE-61954."
+    ],
+    "chromecast": [
+      "<b>2 US, 0 TCs y 0 ejecuciones.</b> Chromecast todavía no ha empezado en la 26.11: no existe el label de campaña.",
+      "La única actividad es el diseño que tiene Laura de GO-37462, la misma funcionalidad que lleva en Web y Android."
+    ]
+  },
+  "notas": {
+    "pc": "GO-37475 cuelga de una US de la 26.10, pero lleva Fix Version 26.11.100."
+  }
+}
