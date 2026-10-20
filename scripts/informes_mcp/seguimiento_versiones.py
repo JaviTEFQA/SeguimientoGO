@@ -57,6 +57,24 @@ def enlace_jql(keys):
     return f"[{len(keys)}](https://jira.tid.es/issues/?jql={quote(jql)})"
 
 
+def especificacion_tpm(us):
+    """US -> (GOSPECS, estado de su [TPM] US Specification). La US cuelga del GOSPECS con un enlace Depends;
+    si hay copias "CLONE - ..." de la subtarea manda la original."""
+    spec_de = {}
+    for u in us:
+        for l in u["fields"].get("issuelinks") or []:
+            o = l.get("outwardIssue") or l.get("inwardIssue")
+            if o and o["key"].startswith("GOSPECS-"):
+                spec_de.setdefault(u["key"], o["key"])
+    specs = {}
+    for bloque in trozos(sorted(set(spec_de.values()))):
+        for x in buscar(f'key in ({",".join(bloque)})', ["subtasks"]):
+            t = [s for s in x["fields"]["subtasks"] if "[TPM] US Specification" in s["fields"]["summary"]]
+            t.sort(key=lambda s: s["fields"]["summary"].strip() != "[TPM] US Specification")
+            specs[x["key"]] = f'{t[0]["key"]} {t[0]["fields"]["status"]["name"]}' if t else "*sin subtarea*"
+    return {k: (s, specs.get(s, "—")) for k, s in spec_de.items()}
+
+
 def ambito(a):
     print(f"\n# {a['titulo']}\n")
     comps = a["comps"]
@@ -153,14 +171,17 @@ def ambito(a):
             for s in pend:
                 sin_dis.append((u, s))
         print(f"## C. US con diseño de pruebas pendiente ({len(sin_dis)})\n")
+        tpm = especificacion_tpm([u for u, _ in sin_dis])
         filas = []
         for u, s in sorted(sin_dis, key=lambda x: (x[1] is None, x[0]["key"])):
             f = u["fields"]
+            spec, st_tpm = tpm.get(u["key"], ("—", "—"))
             filas.append([u["key"], f["status"]["name"], plat(f), corto(f["summary"], 60),
                           s["key"] if s else "*sin subtarea*", s["fields"]["status"]["name"] if s else "—",
                           (nombre(s["fields"].get("assignee")).title() or "**sin asignar**") if s else "—",
-                          len(test_cases(f))])
-        tabla(["US", "Estado US", "Plat.", "Asunto", "Subtarea diseño", "Estado", "Asignada a", "TCs ya enlazados"], filas)
+                          len(test_cases(f)), spec, st_tpm])
+        tabla(["US", "Estado US", "Plat.", "Asunto", "Subtarea diseño", "Estado", "Asignada a", "TCs ya enlazados",
+               "GOSPECS", "[TPM] Spec"], filas)
 
     # D. Resumen
     n = sum(tot.values())

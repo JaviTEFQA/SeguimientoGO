@@ -57,6 +57,7 @@ Trabaja en el scratchpad de la sesión para los ficheros intermedios (`<scratch>
 - «PC» es PC Client + GoBFF (ámbito `pcbff11`).
 - Chromecast no tiene label de campaña (`CC_26.11.100_Chromecast` sin ejecuciones a 15/10/2026): sale con US, bugs y diseño, sin ejecuciones.
 - El diseño pendiente no cuenta las subtareas `[QA] US Test Design` en Resolved.
+- La tabla de diseño pendiente lleva el GOSPECS del que cuelga la US (enlace Depends) y el estado de su subtarea `[TPM] US Specification` (pedido del usuario el 20/10/2026; si hay copias «CLONE - …» manda la original). Especificación Closed con diseño QA parado es lo que hay que señalar; especificación Impeded explica el diseño Impeded.
 - La página es privada salvo que el usuario la comparta desde su menú Share; Claude no puede cambiar eso.
 
 Responde en español, como el resto del repo.

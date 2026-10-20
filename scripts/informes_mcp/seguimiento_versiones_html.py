@@ -67,6 +67,9 @@ def fmt(cab, val):
         return f'<td class="mut"><i>{escape(v.strip("*"))}</i></td>'
     if cab in ("Estado", "Estado US"):
         return f"<td>{badge(v)}</td>"
+    if cab == "[TPM] Spec" and " " in v:  # "GOSPECS-4909 Closed": enlace a la subtarea + estado
+        k, st = v.split(" ", 1)
+        return f'<td><a class="k" href="{JIRA}{escape(k)}">{escape(k)}</a> {badge(st)}</td>'
     cls = {"P": "nok", "Passed": "nok", "Hoy P": "nok", "F": "nbad", "Failed": "nbad", "Hoy F": "nbad",
            "I": "nbad", "Impeded": "nbad", "Hoy I": "nbad", "Pe": "nwarn", "Pending": "nwarn", "Sin eje.": "nmut"}.get(cab, "")
     m = RE_CIFRA_ENLACE.fullmatch(v)
