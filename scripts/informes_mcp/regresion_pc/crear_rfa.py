@@ -30,10 +30,12 @@ for u in d:
 tcs = sorted(tc_us)
 
 existentes = {}
+estado_rfa = {}  # TC -> (estado, assignee) actuales de su ejecución RFA
 ultima = {}
 for b in trozos(tcs):
-    for e in buscar(f'parent in ({",".join(b)}) AND labels = "{LABEL}"', ["parent", "assignee"]):
+    for e in buscar(f'parent in ({",".join(b)}) AND labels = "{LABEL}"', ["parent", "assignee", "status"]):
         existentes[e["fields"]["parent"]["key"]] = e["key"]
+        estado_rfa[e["fields"]["parent"]["key"]] = (e["fields"]["status"]["name"], e["fields"].get("assignee"))
     for e in buscar(f'parent in ({",".join(b)}) AND labels = "{CAMP}"', ["parent", "updated", "assignee", "status"],
                     expand="changelog"):
         k = e["fields"]["parent"]["key"]
@@ -63,8 +65,10 @@ for tc in tcs:
         s = (qa.get(us) or {}).get("eje") or []
         if s and s[0]["fields"].get("assignee"):
             quien, origen = persona(s[0]["fields"]["assignee"]), "QA de ejecución de la US"
+    st, asig = estado_rfa.get(tc, (None, None))
     res[tc] = {"us": us, "previa": e["key"] if e else None, "previa_st": e["fields"]["status"]["name"] if e else None,
-               "asignado": quien, "origen": origen, "rfa": existentes.get(tc)}
+               "asignado": quien, "origen": origen, "rfa": existentes.get(tc),
+               "rfa_st": st, "rfa_asignado": persona(asig)}
 
 
 def crear_ejecucion(tc, summary, asignado, intentos=4):
@@ -105,6 +109,7 @@ from collections import Counter
 print("TCs", len(tcs), "· ya con RFA", len(existentes))
 print("Asignados:", Counter((r["asignado"] or {}).get("display", "SIN ASIGNAR") for r in res.values()).most_common())
 print("Origen:", Counter(r["origen"] or "—" for r in res.values()))
+print("Estado RFA:", Counter(r["rfa_st"] or "sin RFA" for r in res.values()).most_common())
 for tc, r in res.items():
     if r["origen"] != "ejecutó":
         print("  ", tc, r["us"], r["previa"], r["previa_st"], r["origen"], (r["asignado"] or {}).get("display"))
@@ -113,6 +118,7 @@ if crear:
         r = res[tc]
         if not r["rfa"]:
             r["rfa"] = crear_ejecucion(tc, tc_us[tc][1], r["asignado"])
+            r["rfa_st"], r["rfa_asignado"] = "Pending", r["asignado"]
             print("creada", r["rfa"], tc, (r["asignado"] or {}).get("display"))
             json.dump(res, open(S / "rfa.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 json.dump(res, open(S / "rfa.json", "w", encoding="utf-8"), ensure_ascii=False, indent=1)

@@ -38,9 +38,9 @@ def rfa_td(tc):
     r = RFA.get(tc)
     if not r or not r.get("rfa"):
         return '<td class="rfa"><span class="nob">—</span></td>'
-    p = (r.get("asignado") or {}).get("display") or "Sin asignar"
+    p = (r.get("rfa_asignado") or r.get("asignado") or {}).get("display") or "Sin asignar"
     nota = "" if r.get("origen") == "ejecutó" else f'<span class="why">{E(r.get("origen") or "")}</span>'
-    return f'<td class="rfa"><span class="k">{link(r["rfa"])}</span> {badge("Pending")}<div class="who">{E(p)}</div>{nota}</td>'
+    return f'<td class="rfa"><span class="k">{link(r["rfa"])}</span> {badge(r.get("rfa_st") or "Pending")}<div class="who">{E(p)}</div>{nota}</td>'
 
 
 bloques, sin, cnt = [], [], Counter()
@@ -163,11 +163,16 @@ stats = [(len(d), "US de PC"), (total, "Pruebas"), (f'{cnt["E2E"]}<small> de {cn
          (cnt["IMP"], "Impedidas importantes"),
          (cnt["Passed"], "En Passed"), (cnt["Impeded"], "En Impeded"), (cnt["Failed"], "En Failed"),
          (cnt["Pending"] + cnt["Sin ejecución"], "En Pending")]
-rep = Counter((r.get("asignado") or {}).get("display") or "Sin asignar" for r in RFA.values() if r.get("rfa"))
+con_rfa = [r for r in RFA.values() if r.get("rfa")]
+quien_rfa = lambda r: (r.get("rfa_asignado") or r.get("asignado") or {}).get("display") or "Sin asignar"
+rep = Counter(quien_rfa(r) for r in con_rfa)
+hechas = Counter(quien_rfa(r) for r in con_rfa if (r.get("rfa_st") or "Pending") != "Pending")
+st_rfa = Counter(r.get("rfa_st") or "Pending" for r in con_rfa)
+resumen_rfa = ", ".join(f"{st_rfa[s]} {s}" for s in ("Passed", "Failed", "Impeded", "Pending") if st_rfa[s])
 reparto = ("" if not rep else
-           f'<section class="reparto"><h2>Ejecuciones RFA_26.10.100_Web por persona ({sum(rep.values())}, todas en Pending)</h2><ul>'
-           + "".join(f"<li>{E(p)} <b>{n}</b></li>" for p, n in rep.most_common())
-           + '</ul><p class="sub" style="margin:8px 0 0">Cada ejecución va a quien ejecutó el TC por última vez en la campaña CC_26.10.100_Web. Las tres de Redirecciones: Salida nunca se ejecutaron y van al QA de ejecución de la US.</p></section>')
+           f'<section class="reparto"><h2>Ejecuciones RFA_26.10.100_Web por persona ({sum(rep.values())}: {resumen_rfa})</h2><ul>'
+           + "".join(f"<li>{E(p)} <b>{hechas[p]}/{n}</b></li>" for p, n in rep.most_common())
+           + '</ul><p class="sub" style="margin:8px 0 0">Ejecutadas / asignadas por persona. Cada ejecución va a quien ejecutó el TC por última vez en la campaña CC_26.10.100_Web.</p></section>')
 stats_html = "".join(f'<div class="stat"><b>{n}</b><span>{t}</span></div>' for n, t in stats)
 
 # Pestaña Smoke: ejecuciones RFA de los TCs SMOKE, agrupadas por suite
