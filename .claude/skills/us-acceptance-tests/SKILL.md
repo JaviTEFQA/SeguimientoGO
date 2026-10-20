@@ -28,7 +28,7 @@ El script imprime un resumen y la tabla en markdown, ordenada con lo que bloquea
 1. Muestra el resumen (US totales, con y sin subtarea, reparto de estados) y la tabla completa, sin recortar filas.
 2. Debajo, destaca en pocas viñetas:
    - Las subtareas en **Impeded** u **Open** cuya US ya está Resolved o Closed: el desarrollo está entregado y faltan sus acceptance tests.
-   - Las US **sin la subtarea** agrupadas por plataforma. No todas las US la llevan (ahora mismo solo unas 47 de 87), así que preséntalo como dato, no como error.
+   - Las US **sin la subtarea** agrupadas por plataforma. Desde el 20/10/2026 las 87 US de la 26.11.100 la tienen (ese día se crearon las 35 que faltaban en GO, GO-37545 … GO-37579, en Open y sin asignar); si sale alguna nueva sin ella, ofrece crearla con el mismo resumen y el componente de la US.
    - Las subtareas sin asignar.
 3. Si el usuario pide filtrar (solo una plataforma, solo las que no están cerradas…), filtra la tabla al presentarla; no hace falta tocar el script.
 
